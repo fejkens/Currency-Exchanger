@@ -16,10 +16,22 @@ CURRENCY_API_KEY = os.getenv('CURRENCY_API_KEY')
 def main():
 
     # Grab the sys arguments passed in when program is started
-    amount = float(sys.argv[1])
-    base = sys.argv[2]
-    to = sys.argv[3]
-    
+    try:
+        amount = float(sys.argv[1])
+    except ValueError:
+        print('The first argument has to be a valid number')
+        sys.exit()
+    except IndexError:
+        print('Incorrect number of arguments. Usage: py .\exchange.py amount base_currency_code to_currency_code')
+        sys.exit()
+
+    try:
+        base = sys.argv[2]
+        to = sys.argv[3]
+    except IndexError:
+        print('Incorrect number of arguments. Usage: py .\exchange.py amount base_currency_code to_currency_code')
+        sys.exit()
+
     exchange_rate = fetch_exchange_rate(amount, base, to)
 
     # Calculate the resulting amount of the exchange
@@ -39,7 +51,11 @@ def fetch_exchange_rate(amount, base, to):
     req = req.json()
 
     # Since we can't change the base currency on this API, we have to calculate the exchange rate ourselves
-    exchange_rate = req["rates"][to] / req["rates"][base]
+    try: 
+        exchange_rate = req["rates"][to] / req["rates"][base]
+    except KeyError:
+        print('Invalid currencies. Please use the correct three-letter currency codes.')
+        sys.exit()
 
     return exchange_rate
 
